@@ -1,6 +1,6 @@
-# Shai Hulud Detector (NPM Worm)
+# Repo Vulnerability scanner
 
-Scans an org's repositories via GitHub's SBOM API (Dependency Graph)
+Scans an organisation'srepositories via GitHub's SBOM API (Dependency Graph)
 and reports which repos contain any package@version listed in an input file.
 
 ## Installation
@@ -25,7 +25,11 @@ and reports which repos contain any package@version listed in an input file.
 4. Start the scanner:
 
 ```bash
+# Simple
 node sbom-scan.mjs --org=<ORG>
+
+#Advanced
+node sbom-scan.mjs --org=<ORG> [--in=affected.txt] [--out=matches.json] [--include-forks] [--include-archived] [--concurrency=6]
 ```
 
 > [!NOTE]
@@ -38,4 +42,3 @@ We are currently manually monitoring the packages from: [socket.dev](https://soc
 Current affected packages: **526**
 
 [Link to Highlight](https://socket.dev/blog/ongoing-supply-chain-attack-targets-crowdstrike-npm-packages#:~:text=confirmed%20as%20affected%3A-,Total%20packages%3A%20526,-%40ahmedhfarag/ngx%2Dperfect)
-
