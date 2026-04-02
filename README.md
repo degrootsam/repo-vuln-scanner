@@ -34,11 +34,3 @@ node sbom-scan.mjs --org=<ORG> [--in=affected.txt] [--out=matches.json] [--inclu
 
 > [!NOTE]
 > The token needs access to your organisation's repos (scope: repo). Make sure the owner of the PAT is set to the target org.
-
-## Affected NPM Packages
-
-We are currently manually monitoring the packages from: [socket.dev](https://socket.dev/blog/ongoing-supply-chain-attack-targets-crowdstrike-npm-packages)
-
-Current affected packages: **526**
-
-[Link to Highlight](https://socket.dev/blog/ongoing-supply-chain-attack-targets-crowdstrike-npm-packages#:~:text=confirmed%20as%20affected%3A-,Total%20packages%3A%20526,-%40ahmedhfarag/ngx%2Dperfect)
