@@ -1,4 +1,4 @@
-# Repo Vulnerability scanner
+# NPM Vulnerability scanner for repositories
 
 Scans an organisation'srepositories via GitHub's SBOM API (Dependency Graph)
 and reports which repos contain any package@version listed in an input file.
