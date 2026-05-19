@@ -40,6 +40,7 @@ import { Octokit } from "octokit";
 import { readFileSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import semver from "semver";
+import { exit } from "node:process";
 
 // -------------------- CLI args --------------------
 const args = Object.fromEntries(
@@ -175,11 +176,42 @@ const repos = await octokit.paginate("GET /orgs/{org}/repos", {
   type: "all",
 });
 
+const sbomMap = new Map();
+
 const reposToScan = repos.filter((r) => {
   if (!INCLUDE_FORKS && r.fork) return false;
   if (!INCLUDE_ARCHIVED && r.archived) return false;
   return true;
 });
+
+// -------------------- SBOM async fetch --------------------
+async function fetchSbom(owner, repoName) {
+  // Step 1: kick off report generation, get back a URL containing the UUID
+  const genRes = await octokit.request(
+    "GET /repos/{owner}/{repo}/dependency-graph/sbom/generate-report",
+    { owner, repo: repoName },
+  );
+  const reportUrl = genRes.data?.sbom_url ?? "";
+  const m = reportUrl.match(/fetch-report\/([^/?#\s]+)/);
+  if (!m)
+    throw new Error(
+      `Unexpected generate-report response: ${JSON.stringify(genRes.data)}`,
+    );
+  const uuid = m[1];
+
+  // Step 2: poll until the report is ready (201 = still processing; 302 redirect -> SBOM)
+  while (true) {
+    const res = await octokit.request(
+      "GET /repos/{owner}/{repo}/dependency-graph/sbom/fetch-report/{sbom-uuid}",
+      { owner, repo: repoName, "sbom-uuid": uuid },
+    );
+    if (res.status === 201) {
+      await sleep(3000);
+      continue;
+    }
+    return res.data?.sbom;
+  }
+}
 
 // -------------------- Scan SBOMs --------------------
 const affectedMap = new Map(); // key = "name@version" => Set of "org/repo"
@@ -188,12 +220,7 @@ await pool(reposToScan, CONCURRENCY, async (repo) => {
   const full = repo.full_name || `${ORG}/${repo.name}`;
   console.log(`Scanning ${full}`);
   try {
-    // SBOM for default branch head (SPDX JSON)
-    const res = await octokit.request(
-      "GET /repos/{owner}/{repo}/dependency-graph/sbom",
-      { owner: ORG, repo: repo.name },
-    );
-    const sbom = res.data?.sbom;
+    const sbom = await fetchSbom(ORG, repo.name);
     const pkgs = Array.isArray(sbom?.packages) ? sbom.packages : [];
     console.log(
       `Found ${pkgs.length} packages in repository. Checking for matches with affected packages`,
@@ -222,7 +249,7 @@ await pool(reposToScan, CONCURRENCY, async (repo) => {
       affectedMap.get(pair).add(full);
     }
 
-    if (foundPairs.length === 0) {
+    if (foundPairs.size === 0) {
       console.log(`No affected packages found!`);
     }
   } catch (e) {
