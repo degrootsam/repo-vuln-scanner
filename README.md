@@ -1,6 +1,6 @@
-# NPM Vulnerability scanner for repositories
+# NPM Vulnerability Scanner for Repositories
 
-Scans an organisation'srepositories via GitHub's SBOM API (Dependency Graph)
+Scans an organisation's repositories via GitHub's SBOM API (Dependency Graph)
 and reports which repos contain any package@version listed in an input file.
 
 ## Installation
@@ -17,19 +17,33 @@ and reports which repos contain any package@version listed in an input file.
    npm install
    ```
 
-## Usage
+## Workflow
 
-1. Rename `env.example` to `.env`.
-2. Insert your GitHub PAT token.
-3. Edit the `affected.txt` to contain your targeted packages.
-4. Start the scanner:
+### 1. Get affected packages
+
+Download threat intelligence CSVs from [SafeDep](https://safedep.io) and place them in the `import/` directory.
+
+### 2. Parse the CSV
+
+Convert downloaded CSVs into `package@version` lists:
+
+```bash
+npm run parse-csv
+```
+
+For each CSV in `import/`, this writes a corresponding `.txt` to `affected/` and moves the parsed CSV to `import/parsed/`.
+
+### 3. Scan repositories
+
+1. Rename `env.example` to `.env` and insert your GitHub PAT token.
+2. Run the scanner against your org, pointing it at the generated affected file:
 
 ```bash
 # Simple
-node sbom-scan.mjs --org=<ORG>
+npm run sbom-scan -- --org=<ORG>
 
-#Advanced
-node sbom-scan.mjs --org=<ORG> [--in=affected.txt] [--out=matches.json] [--include-forks] [--include-archived] [--concurrency=6]
+# Advanced
+npm run sbom-scan -- --org=<ORG> --in=affected/<file>.txt [--out=matches.json] [--include-forks] [--include-archived] [--concurrency=6]
 ```
 
 > [!NOTE]
