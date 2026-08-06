@@ -4,14 +4,15 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "parse-csv": "tsx parse-csv.ts",
-    "sbom-scan": "tsx sbom-scan.ts",
+    "parse-csv": "bun src/parse-csv.ts",
+    "sbom-scan": "bun src/sbom-scan.ts",
     "typecheck": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@inquirer/prompts": "^8.5.2",
     "csv": "^6.5.1",
     "dotenv": "^17.2.2",
     "octokit": "^5.0.5",

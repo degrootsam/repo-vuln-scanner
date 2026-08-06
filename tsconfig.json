@@ -1,13 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ES2022",
+    "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "outDir": "dist"
+    "skipLibCheck": true
   },
-  "include": ["*.ts"],
+  "include": ["*.ts", "src/sbom-scan.ts", "src/parse-csv.ts"],
   "exclude": ["node_modules", "dist"]
 }
